@@ -49,6 +49,10 @@ Options can be defined in `settings.json` or as command line parameter. Command 
 
 Clone this repo and run build script. You'll find standalone executables for windows, linux and mac in `out` dir.
 
+## Future plans
+
+Update PostgreSQL object comments from markup file.
+
 ## Example output
 
 Example of output is bellow:
@@ -68,17 +72,6 @@ Internal .NET table. Holds a list of all applied migrations in this database.
 | ------ | ---- | -------- | ------- | ------- |
 | MigrationId | character varying(150) | NOT NULL |  |  Matches miragtion file from source code `Data/Migrations/MigrationId.cs` |
 | ProductVersion | character varying(32) | NOT NULL |  |  |
-
-### Table `messages`
-
-Screen messages for the landing page.
-
-| Column | Type | Nullable | Default | Comment |
-| ------ | ---- | -------- | ------- | ------- |
-| id | bigint | NOT NULL | autoincrement | Message id. |
-| message | text | NOT NULL |  | Content of the message. Can hold HTML |
-| role_id | bigint | NULL |  | Role Id to specify which roles will see this. Message. When NULL all users will see this message. |
-| culture | character varying | NULL |  | Culture specifier for multilanguage support. Not used at the moment. |
 
 ### Table `role`
 
