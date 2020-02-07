@@ -57,6 +57,10 @@ Update PostgreSQL object comments from markup file.
 
 Example of output is bellow:
 
+## Direct download
+
+You can download zip archive with latest build [here](https://github.com/vbilopav/PgComment/releases/tag/v1.0)
+
 # Dictionary for database `my_database`
 
 - Server: PostgreSQL `localhost:5432`, version `11.6`
