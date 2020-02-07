@@ -53,13 +53,13 @@ Clone this repo and run build script. You'll find standalone executables for win
 
 Update PostgreSQL object comments from markup file.
 
-## Example output
-
-Example of output is bellow:
-
 ## Direct download
 
 You can download zip archive with latest build [here](https://github.com/vbilopav/PgComment/releases/tag/v1.0)
+
+## Example output
+
+Example of output is bellow:
 
 # Dictionary for database `my_database`
 
