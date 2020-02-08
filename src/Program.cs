@@ -13,6 +13,7 @@ namespace PgComment
         public string MarkupName { get; set; } = "DB DICTIONARY {0}.md";
         public string[] Schemas { get; set; } = {"public"};
         public string SkipTablesPattern { get; set; } = "pg_%";
+        public bool IncludeRoutines { get; set; } = true;
     }
 
     public class Program
@@ -24,8 +25,7 @@ namespace PgComment
             var configBuilder = new ConfigurationBuilder()
                 .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true, reloadOnChange: false)
                 .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.private.json"), optional: true, reloadOnChange: false)
-                .AddCommandLine(args)
-                .AddEnvironmentVariables("PGCOMMENT_");
+                .AddCommandLine(args);
 
             var config = configBuilder.Build();
             Settings = new Settings();
@@ -53,28 +53,44 @@ namespace PgComment
                 outputFile.WriteLine();
                 outputFile.WriteLine($"## Schema `{schema}`");
                 Console.WriteLine($"Writing schema {schema} ...");
-                await foreach (var (tableId, table, column, columnType, nullable, defaultValue, comment) in 
-                    connection.ReadAsync<string, string, string, string, string, string, string>(Sql.Tables,
-                    ("schema", schema), ("skipPattern", Settings.SkipTablesPattern)))
-                {
-                    if (column == null)
-                    {
 
+                await foreach (var result in connection.GetTables(schema, Settings.SkipTablesPattern).ValuesAsync)
+                {
+                    if (result.column == null)
+                    {
+                        Console.WriteLine($"Writing table {result.table} ...");
                         outputFile.WriteLine();
-                        outputFile.WriteLine($"### Table `{tableId}`");
+                        outputFile.WriteLine($"### Table `{schema}.{result.table}`");
                         outputFile.WriteLine();
-                        if (comment != null)
+                        if (result.comment != null)
                         {
-                            outputFile.WriteLine(comment);
+                            outputFile.WriteLine(result.comment);
                             outputFile.WriteLine();
                         }
 
-                        outputFile.WriteLine("| Column | Type | Nullable | Default | Comment |");
-                        outputFile.WriteLine("| ------ | ---- | -------- | ------- | ------- |");
+                        outputFile.WriteLine("| Column |  Constraint | Type | Nullable | Default | Comment |");
+                        outputFile.WriteLine("| ------ | ----------- | -----| -------- | ------- | ------- |");
                     }
                     else
                     {
-                        outputFile.WriteLine($"| {column} | {columnType} | {nullable} | {defaultValue} | {comment} |");
+                        outputFile.WriteLine($"| `{result.column}` | {result.constraintMarkup} | `{result.columnType}` | {result.nullable} | {result.defaultMarkup} | {result.comment} |");
+                    }
+                }
+
+                if (!Settings.IncludeRoutines)
+                {
+                    continue;
+                }
+
+                await foreach (var result in connection.GetRoutines(schema).ValuesAsync)
+                {
+                    Console.WriteLine($"Writing routine {result.name} ...");
+                    outputFile.WriteLine();
+                    outputFile.WriteLine($"### {result.type.First().ToString().ToUpper()}{result.type.Substring(1)} `{schema}.{result.name}`");
+                    if (result.comment != null)
+                    {
+                        outputFile.WriteLine();
+                        outputFile.WriteLine(result.comment);
                     }
                 }
             }
