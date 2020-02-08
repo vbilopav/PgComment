@@ -1,6 +1,13 @@
 {
-  //"Schemas": ["public"],
+  /*
+  "PgComment": {
+    "MarkupName": "DB DICTIONARY {0}.md",
+    "Schemas": [ "public" ],
+    "SkipTablesPattern": "pg_%",
+    "IncludeRoutines": true
+  },
   "ConnectionStrings": {
-    //"Connection1": "Server=localhost;Database=;Port=5432;User Id=;Password=;"
+    "Connection1": "Server=localhost;Database=;Port=5432;User Id=;Password=;"
   }
+  */
 }

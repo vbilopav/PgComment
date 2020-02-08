@@ -85,7 +85,7 @@ namespace PgComment
                     tc.description_markup,
                     c.data_type || 
 
-                        case    when c.data_type <> 'integer' and c.data_type <> 'bigint' 
+                        case    when c.data_type <> 'integer' and c.data_type <> 'bigint' and c.data_type <> 'smallint' 
                                 then
                                     case    when c.character_maximum_length is not null 
                                             then '(' || cast(c.character_maximum_length as varchar) || ')'
