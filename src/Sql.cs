@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Norm.Extensions;
 using Npgsql;
 
@@ -24,6 +25,8 @@ namespace PgComment
                 string type,
                 string name,
                 string signature,
+                string returns,
+                string language,
                 string comment)>
             ValuesAsync { get; set; }
     }
@@ -145,24 +148,34 @@ namespace PgComment
 
         public static RoutineResults GetRoutines(this NpgsqlConnection connection, string schema) => new RoutineResults
         {
-            ValuesAsync = connection.ReadAsync<string, string, string, string>(@"
+            ValuesAsync = connection.ReadAsync<string, string, string, string, string, string>(@"
 
                 select
                     lower(r.routine_type) as type,
                     r.routine_name,
-                    r.routine_name || '(' || array_to_string(
-                        array_agg(
-                            case    when p.parameter_mode = 'IN' 
-                                    then '' else lower(p.parameter_mode) || ' ' 
-                            end || coalesce(p.data_type, '')
-                            order by p.ordinal_position
-                        ), ', ')  
-                        || ')' || ' returns ' || 
-                        case    when r.data_type = 'USER-DEFINED' and r.type_udt_catalog is not null and r.type_udt_schema is not null and r.type_udt_name is not null 
-                                then 'setof ' || r.type_udt_name
-                        else r.data_type
-                        end || ' language ' || lower(r.external_language)
-                    as signature,
+
+                    r.routine_name || 
+                        '(' || 
+                        array_to_string(
+                            array_agg(
+                                case    when p.parameter_mode = 'IN' 
+                                        then '' else lower(p.parameter_mode) || ' ' 
+                                end || coalesce(p.data_type, '')
+                                order by p.ordinal_position
+                            ), 
+                            ', '
+                        ) ||
+                        ')' as signature,
+                        
+                    case    when    r.data_type = 'USER-DEFINED' and 
+                                    r.type_udt_catalog is not null and 
+                                    r.type_udt_schema is not null and 
+                                    r.type_udt_name is not null 
+                            then 'setof ' || r.type_udt_name
+                            else r.data_type
+                    end as returns_type,
+                    
+                    lower(r.external_language) as language,
                     
                     pgdesc.description
 
