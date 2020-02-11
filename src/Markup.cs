@@ -210,11 +210,17 @@ namespace PgComment
                     }
 
                     content.AppendLine(Settings.EndTag);
+                    if (writeToc)
+                    {
+                        content.AppendLine();
+                        content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+                    }
+                    else
+                    {
+                        writeToc = true;
+                    }
                 }
             }
-            content.AppendLine();
-            content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
-
 
             await connection.CloseAsync();
             Console.WriteLine($"Creating file {file} ...");

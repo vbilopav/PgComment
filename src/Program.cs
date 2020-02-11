@@ -14,24 +14,45 @@ namespace PgComment
             var commit = ArgsInclude(args, "-c", "--commit");
             var dump = ArgsInclude(args, "-d", "--dump");
 
+            if (ArgsInclude(args, "-h", "--help"))
+            {
+                PrintHelp();
+                return;
+            }
             if (!pull && !commit && !dump)
             {
                 Console.WriteLine();
                 Console.WriteLine("Type pgcomment --help for options");
                 return;
             }
-            if (ArgsInclude(args, "-h", "--help"))
+            
+            string settingsFile = null;
+            foreach (var arg in args)
             {
-                PrintHelp();
-                return;
+                if (arg.StartsWith("--settings="))
+                {
+                    settingsFile = arg.Split("=").Last();
+                    break;
+                }
             }
 
-            var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true,
-                    reloadOnChange: false)
-                .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.private.json"), optional: true,
-                    reloadOnChange: false)
-                .AddCommandLine(args);
+            IConfigurationBuilder configBuilder;
+            if (settingsFile == null)
+            {
+                configBuilder = new ConfigurationBuilder()
+                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true,
+                        reloadOnChange: false)
+                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.private.json"), optional: true,
+                        reloadOnChange: false)
+                    .AddCommandLine(args);
+            }
+            else
+            {
+                configBuilder = new ConfigurationBuilder()
+                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), settingsFile), optional: true, reloadOnChange: false)
+                    .AddCommandLine(args);
+            }
+
 
             var config = configBuilder.Build();
             Settings.Value = new Settings();
@@ -81,6 +102,7 @@ namespace PgComment
             Console.ResetColor();
             Console.WriteLine();
             PrintItem("-h --help", "This help");
+            PrintItem("--settings=file", "Path to json settings file");
             PrintItem("-p --pull", "Builds markup files based on current settings from comments in database");
             PrintItem("-c --commit", "Commits current changes from markup files to database");
             PrintItem("-d --dump", "Dumps sql for manual comment update. Doesn't update database");
@@ -89,14 +111,14 @@ namespace PgComment
             Console.WriteLine("settings:");
             Console.ResetColor();
             Console.WriteLine();
-            Console.WriteLine("Settings will override setting.json file settings. Only applied when building markup files.");
+            Console.WriteLine("Settings will override setting.json file settings.");
             Console.WriteLine();
             PrintItem("pgcomment:markupname=[name]", "Markup file name. {0} placeholder for database name. Default value is \"DB DICTIONARY {0}.md\"", 40);
             PrintItem("pgcomment:schemas[index]=[schema]", "Schema name to include in markup. Multiple schemas separated by zero based index. Default is \"public\"", 40);
-            PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern. Default is \"pg_%\"", 40);
-            PrintItem("pgcomment:includeviews=[true|false]", "Should views be included?", 40);
-            PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) be included?", 40);
-            PrintItem("connectionstrings:[id]=[connection]", "ADO.NET (Npgsql) connection strings. Use id for multiple connections.", 40);
+            PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern. Default is \"pg_%\". Only applied when building markup files.", 40);
+            PrintItem("pgcomment:includeviews=[true|false]", "Should views be included? Only applied when building markup files.", 40);
+            PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) be included? Only applied when building markup files.", 40);
+            PrintItem("connectionstrings:[id]=[connection]", "ADO.NET (Npgsql) connection strings. Format: Server=;Database=;Port=;User Id=;Password=; Use id for multiple connections.", 40);
             Console.WriteLine();
         }
 
