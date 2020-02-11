@@ -10,6 +10,16 @@ namespace PgComment
     {
         public static async Task Main(string[] args)
         {
+            var pull = ArgsInclude(args, "-p", "-pull");
+            var commit = ArgsInclude(args, "-c", "--commit");
+            var dump = ArgsInclude(args, "-d", "--dump");
+
+            if (!pull && !commit && !dump)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Type pgcomment --help for options");
+                return;
+            }
             if (ArgsInclude(args, "-h", "--help"))
             {
                 PrintHelp();
@@ -31,7 +41,14 @@ namespace PgComment
                 Settings.Value.Schemas = new[] {"public"};
             }
 
-            await Markup.CreateAllMarkups(config);
+            if (commit || dump)
+            {
+                await Update.UpdateFromAllMarkups(config, dump);
+            }
+            else
+            {
+                await Markup.CreateAllMarkups(config);
+            }
         }
 
         private static bool ArgsInclude(string[] args, params string[] values)
@@ -62,9 +79,11 @@ namespace PgComment
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("options:");
             Console.ResetColor();
-            PrintItem("[no option]", "Builds markup files based on current settings");
-            PrintItem("-c -commit", "Commits current changes from markup files to database");
-            PrintItem("-d -dump", "Dumps sql for manual comment update");
+            Console.WriteLine();
+            PrintItem("-h --help", "This help");
+            PrintItem("-p --pull", "Builds markup files based on current settings from comments in database");
+            PrintItem("-c --commit", "Commits current changes from markup files to database");
+            PrintItem("-d --dump", "Dumps sql for manual comment update. Doesn't update database");
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("settings:");
@@ -74,8 +93,9 @@ namespace PgComment
             Console.WriteLine();
             PrintItem("pgcomment:markupname=[name]", "Markup file name. {0} placeholder for database name. Default value is \"DB DICTIONARY {0}.md\"", 40);
             PrintItem("pgcomment:schemas[index]=[schema]", "Schema name to include in markup. Multiple schemas separated by zero based index. Default is \"public\"", 40);
-            PrintItem("pgcomment:skiptablespattern=[pattern]", "Skip tables that are similar with this pattern. Default is \"pg_%\"", 40);
-            PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) ne included?", 40);
+            PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern. Default is \"pg_%\"", 40);
+            PrintItem("pgcomment:includeviews=[true|false]", "Should views be included?", 40);
+            PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) be included?", 40);
             PrintItem("connectionstrings:[id]=[connection]", "ADO.NET (Npgsql) connection strings. Use id for multiple connections.", 40);
             Console.WriteLine();
         }

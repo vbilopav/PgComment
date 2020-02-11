@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
@@ -19,52 +20,81 @@ namespace PgComment
 
         private static async Task CreateMarkupFile(string connectionString)
         {
+            var content = new StringBuilder();
+            var header = new StringBuilder();
+
             var settings = Settings.Value;
+            var schemas = settings.Schemas.Distinct().ToArray();
             await using var connection = new NpgsqlConnection(connectionString);
             await connection.OpenAsync();
             var file = Settings.FileName(connection);
-            Console.WriteLine($"Creating file {file} ...");
-            await using var outputFile = new StreamWriter(file);
-            outputFile.WriteLine($"# Dictionary for database `{connection.Database}`");
-            outputFile.WriteLine();
-            outputFile.WriteLine(
+
+            header.AppendLine($"# Dictionary for database `{connection.Database}`");
+            header.AppendLine();
+            header.AppendLine(
                 $"- Server: PostgreSQL `{connection.Host}:{connection.Port}`, version `{connection.ServerVersion}`");
-            outputFile.WriteLine($"- Local timestamp: `{DateTime.Now:o}`");
+            header.AppendLine($"- Local timestamp: `{DateTime.Now:o}`");
+            header.AppendLine($"- Schemas: {string.Join(", ", schemas.Select(s => $"`{s}`"))}");
+            header.AppendLine();
+            header.AppendLine("## Table of Contents");
+            header.AppendLine();
 
-            foreach (var schema in settings.Schemas.Distinct())
+            var tablesHeader = false;
+            var writeToc = false;
+            var anyTables = false;
+            var anyViews = false;
+
+            foreach (var schema in schemas)
             {
-                var schemaHeader = false;
-
-                await foreach (var result in connection.GetTables(schema, settings.SkipTablesPattern).ValuesAsync)
+                await foreach (var result in connection.GetTables(schema, settings.SkipPattern).ValuesAsync)
                 {
-                    if (!schemaHeader)
+                    if (!tablesHeader)
                     {
-                        outputFile.WriteLine();
-                        outputFile.WriteLine($"## Schema `{schema}`");
-                        Console.WriteLine($"Writing schema {schema} ...");
-                        schemaHeader = true;
+                        //content.AppendLine();
+                        content.AppendLine("## Tables");
+                        tablesHeader = true;
                     }
 
                     if (result.column == null)
                     {
+                        //<a href="#table-of-contents" title="Table of Contents">&#8673;</a>
+
                         Console.WriteLine($"Writing table {result.table} ...");
-                        outputFile.WriteLine();
-                        outputFile.WriteLine($"### Table `{schema}.{result.table}`");
-                        outputFile.WriteLine();
-                        outputFile.WriteLine(Settings.StartTag("table", $"{schema}.{result.table}"));
+                        content.AppendLine();
+
+                        if (writeToc)
+                        {
+                            content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+                            content.AppendLine();
+                        }
+                        else
+                        {
+                            writeToc = true;
+                        }
+
+                        content.AppendLine($"### Table `{schema}.{result.table}`");
+                        header.AppendLine($"- Table [`{schema}.{result.table}`](#table-{schema.ToLower()}{result.table.ToLower()})");
+                        content.AppendLine();
+                        content.AppendLine(Settings.StartTag("table", $"{schema}.{result.table}"));
                         if (result.comment != null)
                         {
-                            outputFile.WriteLine(result.comment);
+                            content.AppendLine(result.comment);
                         }
-                        outputFile.WriteLine(Settings.EndTag);
-                        outputFile.WriteLine();
-                        outputFile.WriteLine("| Column |  Constraint | Type | Nullable | Default | Comment |");
-                        outputFile.WriteLine("| ------ | ----------- | -----| -------- | ------- | ------- |");
+
+                        if (!anyTables)
+                        {
+                            anyTables = true;
+                        }
+                        content.AppendLine(Settings.EndTag);
+                        content.AppendLine();
+                        content.AppendLine("| Column |             | Type | Nullable | Default | Comment |");
+                        content.AppendLine("| ------ | ----------- | -----| -------- | ------- | ------- |");
                     }
                     else
                     {
-                        outputFile.WriteLine(
-                            $"| `{result.column}` " +
+                        var name = $"{schema.ToLower()}-{result.table.ToLower()}-{result.column.ToLower()}";
+                        content.AppendLine(
+                            $"| {Settings.Hashtag(name)}`{result.column}` " +
                             $"| {result.constraintMarkup} " +
                             $"| `{result.columnType}` " +
                             $"| {result.nullable} " +
@@ -72,40 +102,128 @@ namespace PgComment
                             $"| {Settings.StartTag("column", $"{schema}.{result.table}.{result.column}")}{result.comment}{Settings.EndTag} |");
                     }
                 }
+            }
 
-                if (!settings.IncludeRoutines)
+            if (anyTables)
+            {
+                content.AppendLine();
+                content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+            }
+
+            foreach (var schema in schemas)
+            {
+                if (!settings.IncludeViews)
                 {
-                    continue;
+                    break;
                 }
-
-                var routinesHeader = false;
-                await foreach (var result in connection.GetRoutines(schema).ValuesAsync)
+                var viewsHeader = false;
+                await foreach (var result in connection.GetTables(schema, settings.SkipPattern, "VIEW").ValuesAsync)
                 {
-                    if (!routinesHeader)
+                    if (!viewsHeader)
                     {
-                        outputFile.WriteLine();
-                        outputFile.WriteLine("### Routines");
-                        routinesHeader = true;
+                        content.AppendLine();
+                        content.AppendLine("## Views");
+                        viewsHeader = true;
                     }
-                    Console.WriteLine($"Writing routine {result.name} ...");
-                    outputFile.WriteLine();
-                    outputFile.WriteLine(
-                        $"#### {result.type.First().ToString().ToUpper()}{result.type.Substring(1)} `{schema}.{result.signature}`");
-                    outputFile.WriteLine();
-                    outputFile.WriteLine($"- Returns `{result.returns}`");
-                    outputFile.WriteLine();
-                    outputFile.WriteLine($"- Language is `{result.language}`");
-                    outputFile.WriteLine();
-                    outputFile.WriteLine(Settings.StartTag(result.type, $"{schema}.{result.signature}"));
-                    if (result.comment != null)
+
+                    if (result.column == null)
                     {
-                        outputFile.WriteLine(result.comment);
+                        Console.WriteLine($"Writing view {result.table} ...");
+                        content.AppendLine();
+
+                        if (writeToc)
+                        {
+                            content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+                            content.AppendLine();
+                        }
+                        else
+                        {
+                            writeToc = true;
+                        }
+                        if (!anyViews)
+                        {
+                            anyViews = true;
+                        }
+
+                        content.AppendLine($"### View `{schema}.{result.table}`");
+                        header.AppendLine($"- View [`{schema}.{result.table}`](#view-{schema.ToLower()}{result.table.ToLower()})");
+                        content.AppendLine();
+                        content.AppendLine(Settings.StartTag("view", $"{schema}.{result.table}"));
+                        if (result.comment != null)
+                        {
+                            content.AppendLine(result.comment);
+                        }
+
+                        content.AppendLine(Settings.EndTag);
+                        content.AppendLine();
+                        content.AppendLine("| Column | Type | Comment |");
+                        content.AppendLine("| ------ | ---- | --------|");
                     }
-                    outputFile.WriteLine(Settings.EndTag);
+                    else
+                    {
+                        content.AppendLine(
+                            $"| `{result.column}` " +
+                            $"| `{result.columnType}` " +
+                            $"| {Settings.StartTag("column", $"{schema}.{result.table}.{result.column}")}{result.comment}{Settings.EndTag} |");
+                    }
                 }
             }
 
+            if (anyViews)
+            {
+                content.AppendLine();
+                content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+            }
+
+
+            foreach (var schema in schemas)
+            {
+                if (!settings.IncludeRoutines)
+                {
+                    break;
+                }
+                var routinesHeader = false;
+                await foreach (var result in connection.GetRoutines(schema, settings.SkipPattern).ValuesAsync)
+                {
+                    if (!routinesHeader)
+                    {
+                        content.AppendLine();
+                        content.AppendLine("## Routines");
+                        routinesHeader = true;
+                    }
+
+                    Console.WriteLine($"Writing routine {result.name} ...");
+                    content.AppendLine();
+                    content.AppendLine(
+                        $"### {result.type.First().ToString().ToUpper()}{result.type.Substring(1)} `{schema}.{result.signature}`");
+                    var routineAnchor = result.signature.ToLower().Replace("(", "").Replace(")", "").Replace(",", "").Replace(" ", "-");
+                    header.AppendLine($"- {result.type.First().ToString().ToUpper()}{result.type.Substring(1)} [`{schema}.{result.signature}`](#{result.type.ToLower()}-{schema.ToLower()}{routineAnchor})");
+                    content.AppendLine();
+                    content.AppendLine($"- Returns `{result.returns}`");
+                    content.AppendLine();
+                    content.AppendLine($"- Language is `{result.language}`");
+                    content.AppendLine();
+                    content.AppendLine(Settings.StartTag(result.type, $"{schema}.{result.signature}"));
+                    if (result.comment != null)
+                    {
+                        content.AppendLine(result.comment);
+                    }
+
+                    content.AppendLine(Settings.EndTag);
+                }
+            }
+            content.AppendLine();
+            content.AppendLine("<a href=\"#table-of-contents\" title=\"Table of Contents\">&#8673;</a>");
+
+
             await connection.CloseAsync();
+            Console.WriteLine($"Creating file {file} ...");
+            await File.WriteAllTextAsync(file, content.ToString());
+            await using (var fileStream = new StreamWriter(file))
+            {
+                await fileStream.WriteLineAsync(header.ToString());
+                await fileStream.WriteLineAsync(content.ToString());
+            }
             Console.WriteLine("Done!");
         }
     }

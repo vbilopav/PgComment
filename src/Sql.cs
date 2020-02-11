@@ -33,7 +33,7 @@ namespace PgComment
 
     public static class Sql
     {
-        public static TableResults GetTables(this NpgsqlConnection connection, string schema, string skipPattern) => new TableResults
+        public static TableResults GetTables(this NpgsqlConnection connection, string schema, string skipPattern, string type = "BASE TABLE") => new TableResults
         {
             ValuesAsync = connection.ReadAsync<string, string, string, string, string, string, string>(@"
 
@@ -58,7 +58,7 @@ namespace PgComment
                             case    when tc.constraint_type = 'PRIMARY KEY' 
                                     then '**PK**'
                                     when tc.constraint_type = 'FOREIGN KEY' 
-                                    then '**FK [➝](#table-' || ccu.table_schema || ccu.table_name || ') `' || 
+                                    then '**FK [➝](#' || lower(ccu.table_schema || '-' || ccu.table_name || '-' || ccu.column_name) || ') `' ||
                                         case    when tc.constraint_schema = ccu.table_schema 
                                                 then ''
                                                 else ccu.table_schema || '.'
@@ -75,8 +75,22 @@ namespace PgComment
                             on tc.constraint_type = 'FOREIGN KEY' and tc.constraint_schema = kcu.constraint_schema and ccu.constraint_name = kcu.constraint_name
                         where
                             tc.constraint_schema = @schema
+
+                        union all 
+                        
+                        select 
+                            i.relname as table_name, 
+                            a.attname as column_name,
+                            '**IDX**' as description_markup
+                        from 
+                            pg_stat_all_indexes i
+                            inner join pg_attribute a on i.indexrelid = a.attrelid
+                            left outer join information_schema.table_constraints tc on i.indexrelname = tc.constraint_name
+                        where tc.table_name is null and i.schemaname = @schema
+
                         order by
                             description_markup
+
                     ) sub
                     group by 
                         sub.table_name, sub.column_name
@@ -117,11 +131,11 @@ namespace PgComment
                 from (
                         select t1.table_name as table_name_id, t1.table_name
                         from information_schema.tables t1
-                        where t1.table_schema = @schema
+                        where t1.table_schema = @schema and t1.table_type = @type
                         union all
                         select t2.table_name as table_name_id, null as table_name
                         from information_schema.tables t2
-                        where t2.table_schema = @schema
+                        where t2.table_schema = @schema and t2.table_type = @type
                         order by table_name_id, table_name nulls first
                     ) t
                     
@@ -142,11 +156,11 @@ namespace PgComment
                 order by 
                     t.table_name_id, 
                     t.table_name nulls first, 
-                    c.ordinal_position", ("schema", schema), ("skipPattern", skipPattern)
+                    c.ordinal_position", ("schema", schema), ("skipPattern", skipPattern), ("type", type)
             )
         };
 
-        public static RoutineResults GetRoutines(this NpgsqlConnection connection, string schema) => new RoutineResults
+        public static RoutineResults GetRoutines(this NpgsqlConnection connection, string schema, string skipPattern) => new RoutineResults
         {
             ValuesAsync = connection.ReadAsync<string, string, string, string, string, string>(@"
 
@@ -189,13 +203,14 @@ namespace PgComment
                 where
                     r.specific_schema = @schema
                     and r.external_language <> 'INTERNAL'
+                    and r.routine_name not similar to @skipPattern
 
                 group by
                     r.specific_name, r.routine_type, r.external_language, r.routine_name, 
                     r.data_type, r.type_udt_catalog, r.type_udt_schema, r.type_udt_name,
                     pgdesc.description
 
-            ", ("schema", schema))
+            ", ("schema", schema), ("skipPattern", skipPattern))
         };
     }
 }

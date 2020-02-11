@@ -3,7 +3,8 @@
   "PgComment": {
     "MarkupName": "DB DICTIONARY {0}.md",
     "Schemas": [ "public" ],
-    "SkipTablesPattern": "pg_%",
+    "SkipPattern": "pg_%",
+    "IncludeViews": true,
     "IncludeRoutines": true
   },
   "ConnectionStrings": {
