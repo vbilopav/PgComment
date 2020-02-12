@@ -120,9 +120,9 @@ namespace PgComment
             PrintItem("pgcomment:markdownname=[name]", "File name to generate or to search. {0} placeholder for database name. Default value is \"DB DICTIONARY {0}.md\"", 40);
             PrintItem("pgcomment:schemas[index]=[schema]", "Database schemas to include in generated file.. Multiple schemas separated by zero based index. Default is \"public\"", 40);
             PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern when generating file. Default is \"pg_%\".", 40);
-            PrintItem("pgcomment:includeviews=[true|false]", "Should views be included? Only applied when building markup files.", 40);
-            PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) be included? Only applied when building markup files.", 40);
-            PrintItem("connectionstrings:[id]=[connection]", "ADO.NET (Npgsql) connection strings. Format: Server=;Database=;Port=;User Id=;Password=; Use id for multiple connections.", 40);
+            PrintItem("pgcomment:includeviews=[true|false]", "Include views?.", 40);
+            PrintItem("pgcomment:includeroutines=[true|false]", "Include routines (functions and procedures)?", 40);
+            PrintItem("connectionstrings:[name]=[connection]", "Connection strings in ADO.NET (Npgsql) format: `Server=;Database=;Port=;User Id=;Password=;`. Each connection have unique name.", 40);
             Console.WriteLine();
         }
 
