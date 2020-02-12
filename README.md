@@ -75,16 +75,15 @@ Database updated successfully!
 
 Program will also dump SQL sent to the database. Only edited comments are updated.
 
-## Options
+## Command line options
 
-Options can be defined in `settings.json` or as command line parameter. Command line will override  `settings.json`.
-
-| Name | Default | Description |
-| ---- | ------- | ----------- |
-| MarkupName | DB DICTIONARY {0}.md | File name that will be created. `DB DICTIONARY database_name.md` |
-| Schemas | public | CSV list of schema names to include in output file |
-| SkipTablesPattern | pg_% | Skip tables that are similar with this pattern |
-| ConnectionStrings | none | ConnectionStrings section with connections defined by ADO.NET (Npgsql) convention. See example above. |
+| Name | Description |
+| ---- | ----------- |
+| -h --help | Show command line help.  |
+| --settings=file | Use settings file from other location or with different name. Path is relative to command line. |
+| -p --pull | Pulls comments from database and creates a markdown file. One for each connection in settings based on settings configuration. |
+| -c --commit | Updates databases from existing markdown files and dumps SQL sent to database. Markdown file is defined in settings configurartion. |
+| -d --dump | Same as commit but only dumps SQL generated, does not update database. |
 
 ## Building for source
 
