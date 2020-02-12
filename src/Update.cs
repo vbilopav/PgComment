@@ -27,6 +27,11 @@ namespace PgComment
             var file = Settings.FileName(connection);
             Console.WriteLine($"Reading file {file} ...");
             Console.WriteLine();
+            if (!File.Exists(file)) 
+            {
+                Console.WriteLine($"File {file} does not exists, skipping ...");
+                return;
+            }
             var content = await File.ReadAllTextAsync(file);
 
             var comments = new Dictionary<string, string>();
