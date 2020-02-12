@@ -1,6 +1,6 @@
 # pgcomment
 
-A command-line tool to create beautiful, professional and interactive (with navigation) **PostgreSQL database documentation.**
+A **command-line tool** to create beautiful, professional and interactive (with navigation) **PostgreSQL database documentation.**
 
 It can help you create a [Markdown document](https://guides.github.com/features/mastering-markdown/) from [`comment`](https://www.postgresql.org/docs/current/sql-comment.html) entries in your PostgreSQL database.
 
@@ -18,33 +18,62 @@ To keep comments in sync with the database - you can **edit the document and com
 
 ## Basic usage
 
-Run following command from command line:
-
-```
-pgcomment connectionstrings:="server=localhost;database=database_name;port=5432;user id=user;password=password;"
-Creating file DB DICTIONARY database_name.md ...
-Writing schema public ...
-Done!
-```
-
-Settings file `settings.json` instead of command line:
+Create a JSON settings file named `settings.json` or `appsettings.json` to define you database connection:
 
 ```json
 {
   "ConnectionStrings": {
-    "MyConnection": "server=localhost;database=database_name;port=5432;user id=user;password=password;"
+    "MyConnection": "server=localhost;database=my_database;port=5432;user id=user;password=password;"
   }
 }
 ```
 
-Then just run:
+Note that this file might already be part of your project if you using .NET Core settings system.
+
+From command line execute `pgcomment` with `--pull` option:
 
 ```
-pgcomment"
+> pgcomment --pull
+Writing table table1 ...
+Writing table table2 ...
+Writing table table3 ...
+...
 Creating file DB DICTIONARY database_name.md ...
-Writing schema public ...
 Done!
+>
 ```
+
+Your document is created.
+
+To edit created markdown and update comments:
+
+- Edit comments between folllowing tags:
+
+```html
+<!-- comment on table public.table_name is @until-end-tag; -->
+You comment here. Edit me.
+<!-- end -->
+```
+
+From command line execute `pgcomment` with `--commit` option:
+
+```
+> pgcomment --commit
+Reading file DB DICTIONARY database_name.md ...
+
+do $comments_update$
+begin
+
+  comment on table public.table_name is $$You comment here. Edit me.$$;
+  
+end
+$comments_update$;
+
+Database updated successfully!
+>
+```
+
+Program will also dump SQL sent to the database. Only edited comments are updated.
 
 ## Options
 
