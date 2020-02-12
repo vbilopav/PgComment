@@ -1,7 +1,7 @@
 {
   /*
   "PgComment": {
-    "MarkupName": "DB DICTIONARY {0}.md",
+    "MarkdownName": "DB DICTIONARY {0}.md",
     "Schemas": [ "public" ],
     "SkipPattern": "pg_%",
     "IncludeViews": true,

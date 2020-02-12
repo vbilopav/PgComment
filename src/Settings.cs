@@ -5,7 +5,7 @@ namespace PgComment
 {
     public class Settings
     {
-        public string MarkupName { get; set; } = "DB DICTIONARY {0}.md";
+        public string MarkdownName { get; set; } = "DB DICTIONARY {0}.md";
         public string[] Schemas { get; set; } = null;
         public string SkipPattern { get; set; } = "pg_%";
         public bool IncludeRoutines { get; set; } = true;
@@ -22,7 +22,7 @@ namespace PgComment
         public static string EndTag => $"{Open}end{Close}";
         
         public static string FileName(NpgsqlConnection connection) =>
-            Path.Combine(Directory.GetCurrentDirectory(), string.Format(Value.MarkupName, connection.Database));
+            Path.Combine(Directory.GetCurrentDirectory(), string.Format(Value.MarkdownName, connection.Database));
 
         public static string Hashtag(string name) =>
             $"<a id=\"user-content-{name}\" href=\"#{name}\">#</a>";

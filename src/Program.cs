@@ -117,9 +117,9 @@ namespace PgComment
             Console.WriteLine();
             Console.WriteLine("Settings will override setting.json file settings.");
             Console.WriteLine();
-            PrintItem("pgcomment:markupname=[name]", "Markup file name. {0} placeholder for database name. Default value is \"DB DICTIONARY {0}.md\"", 40);
-            PrintItem("pgcomment:schemas[index]=[schema]", "Schema name to include in markup. Multiple schemas separated by zero based index. Default is \"public\"", 40);
-            PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern. Default is \"pg_%\". Only applied when building markup files.", 40);
+            PrintItem("pgcomment:markdownname=[name]", "File name to generate or to search. {0} placeholder for database name. Default value is \"DB DICTIONARY {0}.md\"", 40);
+            PrintItem("pgcomment:schemas[index]=[schema]", "Database schemas to include in generated file.. Multiple schemas separated by zero based index. Default is \"public\"", 40);
+            PrintItem("pgcomment:skippattern=[pattern]", "Skip object that are similar with this pattern when generating file. Default is \"pg_%\".", 40);
             PrintItem("pgcomment:includeviews=[true|false]", "Should views be included? Only applied when building markup files.", 40);
             PrintItem("pgcomment:includeroutines=[true|false]", "Should routines (functions and procedure) be included? Only applied when building markup files.", 40);
             PrintItem("connectionstrings:[id]=[connection]", "ADO.NET (Npgsql) connection strings. Format: Server=;Database=;Port=;User Id=;Password=; Use id for multiple connections.", 40);
