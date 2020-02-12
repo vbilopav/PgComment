@@ -8,7 +8,7 @@ Include your generated document with your source code files and share it with a 
 
 To keep comments in sync with the database - you can **edit the document and commit to the database with one command.**
 
-## See some examples:
+## See some examples
 
 - [`northwind` database](https://github.com/vbilopav/PgComment/blob/e552fdb297cab84461334adfa0041a32be1648f3/DB%20DICTIONARY%20northwind.md)
 

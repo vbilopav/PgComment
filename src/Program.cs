@@ -42,7 +42,11 @@ namespace PgComment
                 configBuilder = new ConfigurationBuilder()
                     .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true,
                         reloadOnChange: false)
+                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json"), optional: true,
+                        reloadOnChange: false)
                     .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.private.json"), optional: true,
+                        reloadOnChange: false)
+                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.Development.json"), optional: true,
                         reloadOnChange: false)
                     .AddCommandLine(args);
             }
