@@ -110,11 +110,19 @@ Multiple setting files will be merged in reveresed order.
 
 ## Building for source
 
-Clone this repo and run build script. You'll find standalone executables for windows, linux and mac in `out` dir.
+You need .NET Core 3.1. framework installed.
+
+Clone this repo and run build script: `build.bat` for Windows or `build.sh` for Linox and Mac.
+
+Build script will create following dirs with stand-alone (framewrok independent) executables:
+
+- `/out/linux-x64`
+- `/out/osx-x64`
+- `/out/win10-x64`
 
 ## Direct download
 
-You can download zip archive with latest build [here](https://github.com/vbilopav/PgComment/releases/tag/v1.0)
+You can download zip archive with latest build [here](https://github.com/vbilopav/PgComment/releases/tag/v2.0)
 
 ## Support
 
@@ -128,5 +136,5 @@ bitcoincash:qp93skpzyxtvw3l3lqqy7egwv8zrszn3wcfygeg0mv
 ## Licence
 
 Copyright (c) Vedran Bilopavlović - VB Consulting 2020
-This source code is licensed under the [MIT license](https://github.com/vbilopav/NoOrm.Net/blob/master/LICENSE).
+This source code is licensed under the [MIT license](https://github.com/vbilopav/PgComment/blob/master/LICENSE).
 
