@@ -122,7 +122,7 @@ namespace PgComment
             {
                 await connection.ExecuteAsync("end");
                 Console.WriteLine();
-                Console.WriteLine("Database updated successfully...");
+                Console.WriteLine("Database updated successfully!");
             }
             
         }
