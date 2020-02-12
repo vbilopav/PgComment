@@ -44,17 +44,14 @@ namespace PgComment
                 dict.ToList().ForEach(x => comments.Add(x.Key, x.Value));
             }
 
-            if (dump)
-            {
-                Console.WriteLine("do $comments_update$");
-                Console.WriteLine("begin");
-                Console.WriteLine("");
-            }
-            else
+            
+            Console.WriteLine("do $comments_update$");
+            Console.WriteLine("begin");
+            Console.WriteLine("");
+            
+            if (!dump)
             {
                 await connection.ExecuteAsync("begin");
-                Console.WriteLine("begin");
-                Console.WriteLine("");
             }
 
             var start = 0;
@@ -116,18 +113,16 @@ namespace PgComment
                 }
             }
 
-            if (dump)
-            {
-                Console.WriteLine();
-                Console.WriteLine("end");
-                Console.WriteLine("$comments_update$;");
-            }
-            else
+
+            Console.WriteLine();
+            Console.WriteLine("end");
+            Console.WriteLine("$comments_update$;");
+            
+            if (!dump)
             {
                 await connection.ExecuteAsync("end");
-                Console.WriteLine("end");
-                Console.WriteLine("Database updated");
-                Console.WriteLine("");
+                Console.WriteLine();
+                Console.WriteLine("Database updated successfully...");
             }
             
         }
