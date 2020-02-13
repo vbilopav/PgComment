@@ -112,7 +112,7 @@ Multiple setting files will be merged in reveresed order.
 
 You need .NET Core 3.1. framework installed.
 
-Clone this repo and run build script: `build.bat` for Windows or `build.sh` for Linox and Mac.
+Clone this repo and run build script: `build.bat` for Windows or `build.sh` for Linux and Mac.
 
 Build script will create following dirs with stand-alone (framewrok independent) executables:
 
