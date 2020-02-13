@@ -103,8 +103,8 @@ Multiple setting files will be merged in reveresed order.
 | `pgcomment:markdownname=[name]` | `"PgComment": {"MarkdownName": "name" }`  | `DB DICTIONARY {0}.md` | File name to generate or to search for. `{0}` placeholder is replaced with database name. |
 | `pgcomment:schemas[index]=[schema]` | `"PgComment": {"Schemas": ["schema1", "schema2"] }`  | `DB DICTIONARY {0}.md` | Database schemas to include in generated file. Multiple schemas in command line settings are separated by zero based index. |
 | `pgcomment:skippattern=[pattern]` | `"PgComment": {"SkipPattern": "pattern" }`  | `pg_%` | Skip object that are similar with this pattern when generating file. Uses `SIMILIAR TO` [syntax](https://www.postgresql.org/docs/current/functions-matching.html) |
-| `pgcomment:includeviews=[true|false]` | `"PgComment": {"IncludeViews": true}`  | `true` | Include views? |
-| `pgcomment:includeroutines=[true|false]` | `"PgComment": {"IncludeRoutines": true}`  | `true` | Include routines (functions and procedures)? |
+| `pgcomment:includeviews=[true or false]` | `"PgComment": {"IncludeViews": true}`  | `true` | Include views? |
+| `pgcomment:includeroutines=[true or false]` | `"PgComment": {"IncludeRoutines": true}`  | `true` | Include routines (functions and procedures)? |
 | `connectionstrings:[name]=[connection]` | `"ConnectionStrings": {"ConnectionName": "connection"}`  | none | Connection strings in ADO.NET (Npgsql) format: `Server=;Database=;Port=;User Id=;Password=;`. Each connection have unique name. |
 
 
@@ -112,7 +112,7 @@ Multiple setting files will be merged in reveresed order.
 
 You need .NET Core 3.1. framework installed.
 
-Clone this repo and run build script: `build.bat` for Windows or `build.sh` for Linox and Mac.
+Clone this repo and run build script: `build.bat` for Windows or `build.sh` for Linux and Mac.
 
 Build script will create following dirs with stand-alone (framewrok independent) executables:
 
@@ -122,7 +122,12 @@ Build script will create following dirs with stand-alone (framewrok independent)
 
 ## Direct download
 
-You can download zip archive with latest build [here](https://github.com/vbilopav/PgComment/releases/tag/v2.0)
+You can download zip archive with latest builds [here](https://github.com/vbilopav/PgComment/releases/download/v2.0/pgcomment.zip)
+
+Archive contains already built executables fow Windows 10, Linux and Mac systems.
+
+Note:
+Linux and Mac version may not be thoroughly tested, they should work without problems theoretically. If you find any issues or bug, please open [new issue here](https://github.com/vbilopav/PgComment/issues/new).
 
 ## Support
 
