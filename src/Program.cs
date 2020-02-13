@@ -10,10 +10,11 @@ namespace PgComment
     {
         public static async Task Main(string[] args)
         {
-            var pull = ArgsInclude(args, "-p", "-pull");
+            var currentDir = Directory.GetCurrentDirectory();
+            var pull = ArgsInclude(args, "-p", "--pull");
             var commit = ArgsInclude(args, "-c", "--commit");
             var dump = ArgsInclude(args, "-d", "--dump");
-
+            
             if (ArgsInclude(args, "-h", "--help"))
             {
                 PrintHelp();
@@ -40,20 +41,20 @@ namespace PgComment
             if (settingsFile == null)
             {
                 configBuilder = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.json"), optional: true,
+                    .AddJsonFile(Path.Join(currentDir, "settings.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json"), optional: true,
+                    .AddJsonFile(Path.Join(currentDir, "appsettings.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "settings.private.json"), optional: true,
+                    .AddJsonFile(Path.Join(currentDir, "settings.private.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), "appsettings.Development.json"), optional: true,
+                    .AddJsonFile(Path.Join(currentDir, "appsettings.Development.json"), optional: true,
                         reloadOnChange: false)
                     .AddCommandLine(args);
             }
             else
             {
                 configBuilder = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Join(Directory.GetCurrentDirectory(), settingsFile), optional: true, reloadOnChange: false)
+                    .AddJsonFile(Path.Join(currentDir, settingsFile), optional: true, reloadOnChange: false)
                     .AddCommandLine(args);
             }
 
@@ -92,7 +93,6 @@ namespace PgComment
                     return true;
                 }
             }
-
             return false;
         }
 
