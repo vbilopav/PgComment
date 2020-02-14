@@ -122,9 +122,10 @@ Build script will create following dirs with stand-alone (framewrok independent)
 
 ## Direct download
 
-You can download zip archive with latest builds [here](https://github.com/vbilopav/PgComment/releases/download/v2.0/pgcomment.zip)
-
-Archive contains already built executables fow Windows 10, Linux and Mac systems.
+You can download zip archivew with latest build here:
+- [linux-x64](https://github.com/vbilopav/PgComment/releases/download/v2.1/linux-x64.zip)
+- [osx-x64](https://github.com/vbilopav/PgComment/releases/download/v2.1/osx-x64.zip)
+- [win10-x64](https://github.com/vbilopav/PgComment/releases/download/v2.1/win10-x64.zip)
 
 Note:
 Linux and Mac version may not be thoroughly tested, they should work without problems theoretically. If you find any issues or bug, please open [new issue here](https://github.com/vbilopav/PgComment/issues/new).
