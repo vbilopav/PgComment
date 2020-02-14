@@ -57,9 +57,7 @@ namespace PgComment
 
                     if (result.column == null)
                     {
-                        //<a href="#table-of-contents" title="Table of Contents">&#8673;</a>
-
-                        Console.WriteLine($"Writing table {result.table} ...");
+                        Program.Dump("Writing table", result.table);
                         content.AppendLine();
 
                         if (writeToc)
@@ -75,7 +73,7 @@ namespace PgComment
                         content.AppendLine($"### Table `{schema}.{result.table}`");
                         header.AppendLine($"- Table [`{schema}.{result.table}`](#table-{schema.ToLower()}{result.table.ToLower()})");
                         content.AppendLine();
-                        content.AppendLine(Settings.StartTag("table", $"{schema}.{result.table}"));
+                        content.AppendLine(Settings.StartTag("table", $"{schema}.\"{result.table}\""));
                         if (result.comment != null)
                         {
                             content.AppendLine(result.comment);
@@ -99,7 +97,7 @@ namespace PgComment
                             $"| `{result.columnType}` " +
                             $"| {result.nullable} " +
                             $"| {result.defaultMarkup} " +
-                            $"| {Settings.StartTag("column", $"{schema}.{result.table}.{result.column}")}{result.comment}{Settings.EndTag} |");
+                            $"| {Settings.StartTag("column", $"{schema}.\"{result.table}\".\"{result.column}\"")}{result.comment}{Settings.EndTag} |");
                     }
                 }
             }
@@ -128,7 +126,7 @@ namespace PgComment
 
                     if (result.column == null)
                     {
-                        Console.WriteLine($"Writing view {result.table} ...");
+                        Program.Dump("Writing view", result.table);
                         content.AppendLine();
 
                         if (writeToc)
@@ -148,7 +146,7 @@ namespace PgComment
                         content.AppendLine($"### View `{schema}.{result.table}`");
                         header.AppendLine($"- View [`{schema}.{result.table}`](#view-{schema.ToLower()}{result.table.ToLower()})");
                         content.AppendLine();
-                        content.AppendLine(Settings.StartTag("view", $"{schema}.{result.table}"));
+                        content.AppendLine(Settings.StartTag("view", $"{schema}.\"{result.table}\""));
                         if (result.comment != null)
                         {
                             content.AppendLine(result.comment);
@@ -164,7 +162,7 @@ namespace PgComment
                         content.AppendLine(
                             $"| `{result.column}` " +
                             $"| `{result.columnType}` " +
-                            $"| {Settings.StartTag("column", $"{schema}.{result.table}.{result.column}")}{result.comment}{Settings.EndTag} |");
+                            $"| {Settings.StartTag("column", $"{schema}.\"{result.table}\".\"{result.column}\"")}{result.comment}{Settings.EndTag} |");
                     }
                 }
             }
@@ -192,7 +190,7 @@ namespace PgComment
                         routinesHeader = true;
                     }
 
-                    Console.WriteLine($"Writing routine {result.name} ...");
+                    Program.Dump("Writing routine", result.name);
                     content.AppendLine();
                     content.AppendLine(
                         $"### {result.type.First().ToString().ToUpper()}{result.type.Substring(1)} `{schema}.{result.signature}`");
@@ -203,7 +201,7 @@ namespace PgComment
                     content.AppendLine();
                     content.AppendLine($"- Language is `{result.language}`");
                     content.AppendLine();
-                    content.AppendLine(Settings.StartTag(result.type, $"{schema}.{result.signature}"));
+                    content.AppendLine(Settings.StartTag(result.type, $"{schema}.{result.signature.Replace(result.name, $"\"{result.name}\"")}"));
                     if (result.comment != null)
                     {
                         content.AppendLine(result.comment);
@@ -223,7 +221,7 @@ namespace PgComment
             }
 
             await connection.CloseAsync();
-            Console.WriteLine($"Creating file {file} ...");
+            Program.Dump("Creating file", file);
             await File.WriteAllTextAsync(file, content.ToString());
             await using (var fileStream = new StreamWriter(file))
             {

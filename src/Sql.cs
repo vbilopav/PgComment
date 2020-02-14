@@ -174,7 +174,7 @@ namespace PgComment
                             array_agg(
                                 case    when p.parameter_mode = 'IN' 
                                         then '' else lower(p.parameter_mode) || ' ' 
-                                end || coalesce(p.data_type, '')
+                                end || coalesce(case when p.data_type = 'ARRAY' then regexp_replace(p.udt_name, '^[_]', '')  || '[]' else p.data_type end, '')
                                 order by p.ordinal_position
                             ), 
                             ', '

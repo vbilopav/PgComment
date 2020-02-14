@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>pgcomment</AssemblyName>
+    <Version>2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

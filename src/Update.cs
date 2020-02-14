@@ -25,11 +25,13 @@ namespace PgComment
             await using var connection = new NpgsqlConnection(connectionString);
             await connection.OpenAsync();
             var file = Settings.FileName(connection);
-            Console.WriteLine($"Reading file {file} ...");
+            Program.Dump("Reading file", file);
             Console.WriteLine();
-            if (!File.Exists(file)) 
+            if (!File.Exists(file))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"File {file} does not exists, skipping ...");
+                Console.ResetColor();
                 return;
             }
             var content = await File.ReadAllTextAsync(file);

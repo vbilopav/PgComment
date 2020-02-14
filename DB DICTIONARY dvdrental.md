@@ -1,7 +1,7 @@
 # Dictionary for database `dvdrental`
 
 - Server: PostgreSQL `localhost:5432`, version `10.4`
-- Local timestamp: `2020-02-11T19:42:50.0005087+01:00`
+- Local timestamp: `2020-02-13T12:10:52.7721381+01:00`
 - Schemas: `public`
 
 ## Table of Contents

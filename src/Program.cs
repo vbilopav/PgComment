@@ -10,6 +10,13 @@ namespace PgComment
     {
         public static async Task Main(string[] args)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("PgComment ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(typeof(Program).Assembly.GetName().Version.ToString());
+            Console.ResetColor();
+            Console.WriteLine();
+
             var currentDir = Directory.GetCurrentDirectory();
             var pull = ArgsInclude(args, "-p", "--pull");
             var commit = ArgsInclude(args, "-c", "--commit");
@@ -23,41 +30,69 @@ namespace PgComment
             if (!pull && !commit && !dump)
             {
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Type pgcomment --help for options");
+                Console.ResetColor();
+                Console.WriteLine();
                 return;
             }
             
             string settingsFile = null;
             foreach (var arg in args)
             {
-                if (arg.StartsWith("--settings="))
+                if (!arg.StartsWith("--settings="))
                 {
-                    settingsFile = arg.Split("=").Last();
-                    break;
+                    continue;
                 }
+                settingsFile = arg.Split("=").Last();
+                break;
+            }
+
+            var usingSettingFile = false;
+            string SettingFile(string name, bool showError = false)
+            {
+                var fullName = Path.Join(currentDir, name);
+                if (File.Exists(fullName))
+                {
+                    if (!usingSettingFile)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Using setting files:");
+                        usingSettingFile = true;
+                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"    - {name}");
+                } 
+                else if (showError)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"File {fullName} could not be found");
+                }
+                return fullName;
             }
 
             IConfigurationBuilder configBuilder;
             if (settingsFile == null)
             {
+                
                 configBuilder = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Join(currentDir, "settings.json"), optional: true,
+                    .AddJsonFile(SettingFile("settings.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(currentDir, "appsettings.json"), optional: true,
+                    .AddJsonFile(SettingFile("appsettings.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(currentDir, "settings.private.json"), optional: true,
+                    .AddJsonFile(SettingFile("settings.private.json"), optional: true,
                         reloadOnChange: false)
-                    .AddJsonFile(Path.Join(currentDir, "appsettings.Development.json"), optional: true,
+                    .AddJsonFile(SettingFile("appsettings.Development.json"), optional: true,
                         reloadOnChange: false)
                     .AddCommandLine(args);
             }
             else
             {
                 configBuilder = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Join(currentDir, settingsFile), optional: true, reloadOnChange: false)
+                    .AddJsonFile(SettingFile(settingsFile, true), optional: true, reloadOnChange: false)
                     .AddCommandLine(args);
             }
-
+            Console.ResetColor();
 
             var config = configBuilder.Build();
             Settings.Value = new Settings();
@@ -75,6 +110,16 @@ namespace PgComment
             {
                 await Markup.CreateAllMarkups(config);
             }
+        }
+
+        public static void Dump(string msg, string item)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(msg);
+            Console.Write(" ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(item);
+            Console.ResetColor();
         }
 
         private static bool ArgsInclude(string[] args, params string[] values)
