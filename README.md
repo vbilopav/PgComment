@@ -50,7 +50,7 @@ To edit created markdown and update comments:
 - Edit comments between folllowing tags:
 
 ```html
-<!-- comment on table public.table_name is @until-end-tag; -->
+<!-- comment on table public."table_name" is @until-end-tag; -->
 You comment here. Edit me.
 <!-- end -->
 ```
@@ -64,7 +64,7 @@ Reading file DB DICTIONARY database_name.md ...
 do $comments_update$
 begin
 
-  comment on table public.table_name is $$You comment here. Edit me.$$;
+  comment on table public."table_name" is $$You comment here. Edit me.$$;
   
 end
 $comments_update$;
